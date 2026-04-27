@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debriefing — Raízes Caninas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0A2342;--blue:#1565C0;--blue2:#1976D2;
+  --blueL:#E3F2FD;--blueM:#BBDEFB;
+  --teal:#00796B;--tealL:#E0F2F1;
+  --purple:#6A1B9A;--purpleL:#F3E5F5;
+  --orange:#E65100;--orangeL:#FFF3E0;
+  --gray1:#334155;--gray2:#64748B;--gray3:#CBD5E1;--gray4:#F1F5F9;
+  --white:#FFFFFF;--offW:#F8FAFC;--green:#2E7D32;
+}
+body{font-family:'Calibri','Segoe UI',sans-serif;background:var(--offW);color:var(--gray1)}
+nav{position:sticky;top:0;z-index:100;background:var(--navy);display:flex;align-items:center;border-bottom:3px solid var(--blue2)}
+nav .brand{color:#fff;font-size:13px;font-weight:600;padding:12px 20px;border-right:3px solid var(--blue2);letter-spacing:.05em;white-space:nowrap}
+nav .nav-links{display:flex;flex:1;overflow-x:auto}
+nav a{color:#90CAF9;font-size:12px;padding:12px 14px;text-decoration:none;letter-spacing:.04em;border-right:1px solid #1A3A5C;transition:background .15s;white-space:nowrap;cursor:pointer}
+nav a:hover,nav a.active{background:var(--blue2);color:#fff}
+.lang-switcher{display:flex;align-items:center;gap:5px;padding:0 14px;margin-left:auto}
+.lang-btn{font-size:11px;font-weight:700;padding:5px 12px;border:1.5px solid #334E6B;border-radius:20px;cursor:pointer;color:#90CAF9;background:transparent;letter-spacing:.06em;transition:all .15s}
+.lang-btn.active{background:var(--blue2);color:#fff;border-color:var(--blue2)}
+section{display:none;padding:2rem 2.5rem;max-width:1100px;margin:0 auto}
+section.active{display:block}
+.sec-header{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:2px solid var(--gray3)}
+.sec-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.sec-header h2{font-size:18px;font-weight:700;color:var(--navy)}
+.sec-header .badge{font-size:11px;background:var(--gray4);color:var(--gray2);padding:3px 10px;border-radius:20px;margin-left:auto;font-weight:500}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.metric{background:var(--white);border:1px solid var(--gray3);border-radius:10px;padding:1.1rem 1.25rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.metric.hl{background:var(--blueL);border-color:var(--blueM);border-left:4px solid var(--blue2)}
+.metric.hl-teal{background:var(--tealL);border-color:#B2DFDB;border-top:3px solid var(--teal)}
+.metric.hl-purple{background:var(--purpleL);border-color:#CE93D8;border-top:3px solid var(--purple)}
+.metric.hl-orange{background:var(--orangeL);border-color:#FFCC80;border-top:3px solid var(--orange)}
+.metric.hl-green{background:#E8F5E9;border-color:#A5D6A7;border-top:3px solid var(--green)}
+.metric .lbl{font-size:11px;font-weight:600;color:var(--gray2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.metric .val{font-size:28px;font-weight:700;color:var(--navy);font-family:Georgia,serif;line-height:1.1}
+.metric.hl .val{color:var(--blue)}
+.metric.hl-teal .val{color:var(--teal)}
+.metric.hl-purple .val{color:var(--purple)}
+.metric.hl-orange .val{color:var(--orange)}
+.metric.hl-green .val{color:var(--green)}
+.metric .sub{font-size:12px;color:var(--gray2);margin-top:5px}
+.card{background:var(--white);border:1px solid var(--gray3);border-radius:12px;padding:1.25rem 1.5rem;box-shadow:0 1px 6px rgba(0,0,0,.05);margin-top:1.25rem}
+.card h3{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.05em}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl thead th{text-align:left;font-size:11px;font-weight:600;color:var(--gray2);text-transform:uppercase;letter-spacing:.06em;padding:8px 12px;border-bottom:2px solid var(--gray3)}
+.tbl tbody td{padding:10px 12px;border-bottom:1px solid var(--gray4);color:var(--gray1)}
+.tbl tbody td.val{font-weight:700;color:var(--navy);text-align:right}
+.tbl tbody tr:hover{background:var(--gray4)}
+.roas-row{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.roas-row .rlbl{font-size:13px;color:var(--gray1);min-width:220px}
+.roas-track{flex:1;height:18px;background:var(--gray4);border-radius:4px;overflow:hidden}
+.roas-fill{height:100%;border-radius:4px}
+.roas-row .rnum{font-size:14px;font-weight:700;min-width:50px;text-align:right}
+.product-row{display:flex;align-items:center;padding:14px 0;border-bottom:1px solid var(--gray4)}
+.product-row:last-child{border-bottom:none}
+.product-accent{width:5px;height:48px;border-radius:3px;margin-right:14px;flex-shrink:0}
+.product-info{flex:1}
+.product-info .name{font-size:14px;font-weight:700;color:var(--navy)}
+.product-info .detail{font-size:12px;color:var(--gray2);margin-top:3px}
+.product-val{font-size:22px;font-weight:700;font-family:Georgia,serif}
+.chart-wrap{position:relative;width:100%;height:260px;margin-top:1rem}
+.chart-wrap.tall{height:320px}
+.footnote{font-size:11px;color:var(--gray2);margin-top:2rem;padding-top:1rem;border-top:1px solid var(--gray3);line-height:1.6}
+.divider{border:none;border-top:1px solid var(--gray3);margin:1.5rem 0}
+.cover{background:var(--navy);border-radius:14px;padding:3rem 2.5rem;margin-bottom:2rem;display:flex;align-items:flex-end;justify-content:space-between}
+.cover h1{font-family:Georgia,serif;font-size:42px;font-weight:700;color:#fff;line-height:1.15}
+.cover .csub{font-size:14px;color:#90CAF9;margin-top:8px}
+.cover .roas-big{text-align:right}
+.cover .roas-big .rnum{font-family:Georgia,serif;font-size:52px;font-weight:700;color:#fff}
+.cover .roas-big .rlbl{font-size:12px;color:#90CAF9;margin-top:4px}
+.totals-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;background:var(--blueL);border-radius:10px;padding:1.25rem;border:1px solid var(--blueM);margin-top:1rem}
+.totals-row .t-lbl{font-size:11px;color:var(--blue2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:4px}
+.totals-row .t-val{font-size:22px;font-weight:700;color:var(--navy);font-family:Georgia,serif}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sum-card{background:#122842;border-radius:10px;padding:1.1rem 1.25rem;border:1px solid #1A3A5C}
+.sum-card.hl{background:var(--blue2);border-color:#1976D2}
+.sum-card.hl-green{background:#1B5E20;border-color:#2E7D32}
+.sum-card .lbl{font-size:11px;color:#90CAF9;text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:4px}
+.sum-card.hl-green .lbl{color:#A5D6A7}
+.sum-card .val{font-size:26px;font-weight:700;color:#fff;font-family:Georgia,serif}
+.sum-card .sub{font-size:12px;color:#90CAF9;margin-top:4px}
+.sum-card.hl-green .sub{color:#A5D6A7}
+.dark-bg{background:var(--navy);border-radius:14px;padding:2rem;margin-bottom:1.25rem}
+.dark-bg h2{font-family:Georgia,serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:4px}
+.dark-bg h3{font-size:13px;color:#90CAF9;margin-bottom:1.25rem}
+.chart-legend{display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--gray2);flex-wrap:wrap}
+.chart-legend span{display:flex;align-items:center;gap:6px}
+.legend-dot{width:12px;height:12px;border-radius:2px;display:inline-block;flex-shrink:0}
+.legend-line{width:20px;height:3px;display:inline-block;flex-shrink:0;border-radius:2px}
+/* Account badge inline */
+.acct-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:.04em;vertical-align:middle;margin-left:6px}
+.acct-usd{background:#E0F2F1;color:#00695C}
+.acct-eur{background:var(--purpleL);color:var(--purple)}
+/* Sub section divider */
+.sub-sec{margin-top:2rem;padding-top:1.25rem;border-top:2px dashed var(--gray3)}
+.sub-sec-title{font-size:12px;font-weight:700;color:var(--gray2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:1rem}
+/* Creatives */
+.creative-tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:1rem}
+.creative-tbl thead th{text-align:left;font-size:11px;font-weight:600;color:var(--gray2);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:2px solid var(--gray3)}
+.creative-tbl tbody td{padding:10px 10px;border-bottom:1px solid var(--gray4)}
+.creative-tbl tbody tr:hover{background:var(--gray4)}
+.creative-tbl .num{font-weight:700;color:var(--navy);text-align:right}
+.creative-tbl .cpl-val{color:var(--green);font-weight:700;text-align:right}
+.creative-tbl tr.gold-row{background:#FFFDE7}
+.creative-tbl tr.silver-row{background:#FAFAFA}
+.creative-tbl tr.bronze-row{background:#FBF5F2}
+.rank-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:6px}
+.rank-badge.gold{background:#FFF8E1;color:#F57F17;border:1px solid #F9A825}
+.rank-badge.silver{background:#ECEFF1;color:#455A64;border:1px solid #90A4AE}
+.rank-badge.bronze{background:#EFEBE9;color:#5D4037;border:1px solid #A1887F}
+.rank-badge.blue{background:var(--blueL);color:var(--blue);border:1px solid var(--blueM)}
+/* Audience table */
+.rank-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.rank-tbl thead th{text-align:left;font-size:11px;font-weight:600;color:var(--gray2);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:2px solid var(--gray3)}
+.rank-tbl tbody tr{border-bottom:1px solid var(--gray4)}
+.rank-tbl tbody tr:hover{background:var(--gray4)}
+.rank-tbl tbody td{padding:10px 10px}
+.rank-tbl .num{font-weight:700;color:var(--navy);text-align:right}
+.rank-tbl .best{color:var(--green)}
+.rank-num{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.rn1{background:#FFF8E1;color:#F57F17}
+.rn2{background:#ECEFF1;color:#455A64}
+.rn3{background:#EFEBE9;color:#5D4037}
+.rnn{background:var(--gray4);color:var(--gray2)}
+.latam-note{background:#FFF3E0;border:1px solid #FFCC80;border-radius:8px;padding:10px 14px;font-size:12px;color:#E65100;margin-bottom:12px;line-height:1.5}
+
+.rank-tbl tfoot td{padding:10px 10px;color:var(--navy)}
+@media(max-width:700px){.grid3,.grid4{grid-template-columns:repeat(2,1fr)};section{padding:1.25rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">🐕 Raízes Caninas</div>
+  <div class="nav-links" id="navLinks">
+    <a data-sec="visao" data-nav="nav_visao" class="active">Visão Geral</a>
+    <a data-sec="captacao" data-nav="nav_captacao">Captação</a>
+    <a data-sec="vendas" data-nav="nav_vendas">Vendas</a>
+    <a data-sec="origem" data-nav="nav_origem">Origem das Vendas</a>
+    <a data-sec="criativos" data-nav="nav_criativos">Criativos &amp; Públicos</a>
+    <a data-sec="resumo" data-nav="nav_resumo">Resumo</a>
+  </div>
+  <div class="lang-switcher">
+    <button class="lang-btn" onclick="setLang('pt')">PT</button>
+    <button class="lang-btn active" onclick="setLang('es')">ES</button>
+  </div>
+</nav>
+
+<!-- ==================== VISÃO GERAL ==================== -->
+<section id="visao" class="active">
+  <div class="cover">
+    <div>
+      <div style="font-size:12px;color:#90CAF9;letter-spacing:.1em;margin-bottom:8px;" data-t="cover_tag">DEBRIEFING · MAR–ABR 2026</div>
+      <h1>Raízes<br>Caninas</h1>
+      <div class="csub" data-t="cover_sub">Tráfego · Captação · Vendas · ROAS</div>
+    </div>
+    <div class="roas-big">
+      <div class="rnum">2,80×</div>
+      <div class="rlbl" data-t="roas_final_lbl">ROAS final (6 meses)</div>
+    </div>
+  </div>
+  <div class="sec-header">
+    <div class="sec-dot" style="background:var(--blue2);"></div>
+    <h2 data-t="h_visao_geral">Visão Geral Financeira</h2>
+    <span class="badge" data-t="badge_consolidado">Lançamento consolidado em €</span>
+  </div>
+  <div class="grid4" style="margin-bottom:1.25rem;">
+    <div class="metric hl"><div class="lbl" data-t="inv_total">Investimento Total</div><div class="val">€6.384</div><div class="sub">Contas USD + EUR</div></div>
+    <div class="metric hl-orange"><div class="lbl" data-t="fat_realizado">Faturamento Realizado</div><div class="val">€10.538</div><div class="sub" data-t="receita_caixa">Já no caixa</div></div>
+    <div class="metric hl-green"><div class="lbl" data-t="fat_6m">Faturamento Total (6m)</div><div class="val">€17.853</div><div class="sub" data-t="incl_rec">Incl. recorrência</div></div>
+    <div class="metric hl"><div class="lbl" data-t="roas_final">ROAS Final (6 meses)</div><div class="val">2,80×</div><div class="sub">€17.853 / €6.384</div></div>
+  </div>
+  <div class="card">
+    <h3 data-t="h_evolucao_roas">Evolução do ROAS</h3>
+    <div class="roas-row">
+      <div class="rlbl" data-t="roas_realizado">ROAS Realizado (no ato)</div>
+      <div class="roas-track"><div class="roas-fill" style="width:59%;background:var(--gray2);"></div></div>
+      <div class="rnum" style="color:var(--gray2);">1,65×</div>
+    </div>
+    <div class="roas-row">
+      <div class="rlbl" data-t="roas_final_bar">ROAS Final (6 meses)</div>
+      <div class="roas-track"><div class="roas-fill" style="width:100%;background:var(--green);"></div></div>
+      <div class="rnum" style="color:var(--green);">2,80×</div>
+    </div>
+  </div>
+  <div class="card">
+    <h3 data-t="h_leads">Leads Captados</h3>
+    <div class="grid3" style="margin-bottom:0;">
+      <div>
+        <div style="font-size:11px;color:var(--gray2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:4px;" data-t="conta_usd">Conta USD <span class="acct-tag acct-usd">USD→EUR</span></div>
+        <div style="font-size:28px;font-weight:700;color:var(--teal);font-family:Georgia,serif;">2.150</div>
+        <div style="font-size:12px;color:var(--gray2);">CPL: €2,56 · Inv.: €5.541</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--gray2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:4px;" data-t="conta_eur">Conta EUR <span class="acct-tag acct-eur">EUR</span></div>
+        <div style="font-size:28px;font-weight:700;color:var(--purple);font-family:Georgia,serif;">236</div>
+        <div style="font-size:12px;color:var(--gray2);">CPL: €3,64 · Inv.: €859</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--gray2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:4px;" data-t="total_leads">Total de Leads</div>
+        <div style="font-size:28px;font-weight:700;color:var(--blue);font-family:Georgia,serif;">2.386</div>
+        <div style="font-size:12px;color:var(--gray2);" data-t="campanhas_total">7 campanhas no total</div>
+      </div>
+    </div>
+  </div>
+  <div class="footnote" data-t="footnote_visao">Todos os valores em €. Conversão USD→EUR: $1 = €0,87 · $6.369 × 0,87 = €5.541 + €859 EUR = €6.400 · Valor oficial produção usado: €6.384,43 · Recorrência: 21 × €77 × 6 meses</div>
+</section>
+
+<!-- ==================== CAPTAÇÃO (combinada) ==================== -->
+<section id="captacao">
+  <div class="sec-header">
+    <div class="sec-dot" style="background:var(--teal);"></div>
+    <h2 data-t="h_captacao">Captação — Visão Consolidada</h2>
+    <span class="badge" data-t="badge_captacao">Meta Ads · USD + EUR · tudo em €</span>
+  </div>
+
+  <!-- Totais combinados -->
+  <div class="grid4">
+    <div class="metric hl-teal"><div class="lbl" data-t="inv_total_cap">Investimento Total</div><div class="val">€6.384</div><div class="sub" data-t="duas_contas">2 contas ativas</div></div>
+    <div class="metric hl-teal"><div class="lbl" data-t="leads_captados">Leads Captados</div><div class="val">2.386</div><div class="sub">CPL: €2,68</div></div>
+    <div class="metric hl-teal"><div class="lbl">CTR médio (link)</div><div class="val">2,27%</div><div class="sub" data-t="cliques_total">≈17.370 cliques no link</div></div>
+    <div class="metric hl-teal"><div class="lbl" data-t="alcance">Alcance total</div><div class="val">326K</div><div class="sub" data-t="impressoes_total">≈769K impressões</div></div>
+  </div>
+
+  <!-- Gráfico diário combinado -->
+  <div class="card">
+    <h3 data-t="h_diario_cap">Volume Diário — Leads, Investimento e CPL <span style="font-weight:400;color:var(--gray2);font-size:11px;">(ambas as contas · €)</span></h3>
+    <div class="chart-wrap tall"><canvas id="dailyCapChart"></canvas></div>
+    <div class="chart-legend">
+      <span><span class="legend-dot" style="background:rgba(30,136,229,0.7);"></span><span data-t="leg_leads">Volume de Leads</span></span>
+      <span><span class="legend-line" style="background:#2E7D32;"></span><span data-t="leg_invest">Investimento (€)</span></span>
+      <span><span class="legend-line" style="background:#111;"></span><span data-t="leg_cpl">CPL diário (€)</span></span>
+      <span><span class="legend-line" style="background:rgba(0,0,0,0.22);border-top:2px dashed rgba(0,0,0,.3);height:0;"></span><span data-t="leg_cpl_acum">CPL acumulado</span></span>
+    </div>
+  </div>
+
+  <!-- Resumo por conta -->
+  <div class="sub-sec">
+    <div class="sub-sec-title" data-t="h_resumo_contas">Resumo por Conta</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+
+      <!-- USD -->
+      <div class="card" style="margin-top:0;border-top:3px solid var(--teal);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+          <span class="acct-tag acct-usd" style="font-size:11px;padding:3px 10px;">Conta USD</span>
+          <span style="font-size:11px;color:var(--gray2);" data-t="usd_conv">convertido p/ € ($1 = €0,87)</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;">
+          <div><div style="font-size:10px;color:var(--gray2);text-transform:uppercase;font-weight:600;" data-t="investimento">Investimento</div><div style="font-size:20px;font-weight:700;color:var(--navy);font-family:Georgia,serif;">€5.541</div><div style="font-size:11px;color:var(--gray2);">$6.369 originais</div></div>
+          <div><div style="font-size:10px;color:var(--gray2);text-transform:uppercase;font-weight:600;" data-t="leads_captados">Leads</div><div style="font-size:20px;font-weight:700;color:var(--teal);font-family:Georgia,serif;">2.150</div><div style="font-size:11px;color:var(--gray2);">CPL: €2,56</div></div>
+        </div>
+        <div class="chart-wrap" style="height:200px;margin-top:.5rem;"><canvas id="usdDailyChart"></canvas></div>
+        <table class="tbl" style="margin-top:1rem;">
+          <thead><tr><th data-t="th_campanha">Campanha</th><th style="text-align:right" data-t="th_leads">Leads</th><th style="text-align:right" data-t="th_investido">€ Inv.</th><th style="text-align:right">CPL</th></tr></thead>
+          <tbody>
+            <tr><td>CAPTACION-TF-CBO-LATAM<span class="acct-tag" style="background:#FFF3E0;color:#BF360C;font-size:9px;margin-left:4px;">LATAM</span></td><td class="val">435</td><td class="val">€137</td><td class="val">€0,31</td></tr>
+            <tr><td>CAPTACION-TF-CBO-ESP</td><td class="val">1.110</td><td class="val">€3.063</td><td class="val">€2,76</td></tr>
+            <tr><td>CAPTACION-TT-ABO-ESP</td><td class="val">593</td><td class="val">€1.467</td><td class="val">€2,47</td></tr>
+            <tr><td>CAPTACION-TF-CBO-EUA</td><td class="val">12</td><td class="val">€48</td><td class="val">€4,00</td></tr>
+            <tr><td>LEMBRETE-TT-CBO</td><td class="val">—</td><td class="val">€26</td><td class="val">—</td></tr>
+            <tr><td>VENTAS-TT-ABO</td><td class="val">—</td><td class="val">€80</td><td class="val">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- EUR -->
+      <div class="card" style="margin-top:0;border-top:3px solid var(--purple);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+          <span class="acct-tag acct-eur" style="font-size:11px;padding:3px 10px;">Conta EUR</span>
+          <span style="font-size:11px;color:var(--gray2);" data-t="eur_nativa">já em euro nativo</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;">
+          <div><div style="font-size:10px;color:var(--gray2);text-transform:uppercase;font-weight:600;" data-t="investimento">Investimento</div><div style="font-size:20px;font-weight:700;color:var(--navy);font-family:Georgia,serif;">€859</div><div style="font-size:11px;color:var(--gray2);">1 campanha ativa</div></div>
+          <div><div style="font-size:10px;color:var(--gray2);text-transform:uppercase;font-weight:600;" data-t="leads_captados">Leads</div><div style="font-size:20px;font-weight:700;color:var(--purple);font-family:Georgia,serif;">236</div><div style="font-size:11px;color:var(--gray2);">CPL: €3,64</div></div>
+        </div>
+        <div class="chart-wrap" style="height:200px;margin-top:.5rem;"><canvas id="eurDailyChart"></canvas></div>
+        <table class="tbl" style="margin-top:1rem;">
+          <thead><tr><th data-t="th_campanha">Campanha</th><th style="text-align:right" data-t="th_leads">Leads</th><th style="text-align:right" data-t="th_investido">€ Inv.</th><th style="text-align:right">CPL</th></tr></thead>
+          <tbody>
+            <tr><td>CAPTACION-TF-CBO-ESP</td><td class="val">236</td><td class="val">€859</td><td class="val">€3,64</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--gray4);">
+          <div style="font-size:11px;font-weight:600;color:var(--gray2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;" data-t="metricas_eur">Métricas EUR</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;">
+            <div><span style="color:var(--gray2);">Impressões:</span> <strong>107.439</strong></div>
+            <div><span style="color:var(--gray2);">CPM:</span> <strong>€7,99</strong></div>
+            <div><span style="color:var(--gray2);">Cliques link:</span> <strong>2.905</strong></div>
+            <div><span style="color:var(--gray2);">CTR:</span> <strong>2,70%</strong></div>
+            <div><span style="color:var(--gray2);">Alcance:</span> <strong>70.050</strong></div>
+            <div><span style="color:var(--gray2);">Freq.:</span> <strong>1,53</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== VENDAS ==================== -->
+<section id="vendas">
+  <div class="sec-header">
+    <div class="sec-dot" style="background:var(--orange);"></div>
+    <h2 data-t="h_vendas">Vendas</h2>
+    <span class="badge" data-t="badge_vendas">Raízes Caninas + outros produtos</span>
+  </div>
+  <div class="grid3" style="margin-bottom:1.25rem;">
+    <div class="metric hl-orange"><div class="lbl" data-t="preco_cheio_lbl">Preço Cheio (€387)</div><div class="val">20 vendas</div><div class="sub">€7.740 gerados</div></div>
+    <div class="metric hl"><div class="lbl" data-t="parcelado_lbl">Parcelado (€77 × 6)</div><div class="val">19 vendas</div><div class="sub">€1.463 no ato · €8.778 total</div></div>
+    <div class="metric"><div class="lbl" data-t="total_rc">Total Raízes Caninas</div><div class="val">39 vendas</div><div class="sub">€9.203 realizados</div></div>
+  </div>
+  <div class="totals-row">
+    <div><div class="t-lbl" data-t="total_vendas">Total de vendas</div><div class="t-val">102</div></div>
+    <div><div class="t-lbl" data-t="realizado">Realizado</div><div class="t-val">€10.538</div></div>
+    <div><div class="t-lbl" data-t="rec_pendente">Recorrência pendente</div><div class="t-val">€7.315</div></div>
+    <div><div class="t-lbl" data-t="total_6m">Total 6 meses</div><div class="t-val">€17.853</div></div>
+  </div>
+  <div class="card">
+    <h3 data-t="h_vendas_diarias">Vendas Diárias por Produto (€)</h3>
+    <div class="chart-wrap tall"><canvas id="vendasChart"></canvas></div>
+    <div class="chart-legend" style="margin-top:10px;">
+      <span><span class="legend-dot" style="background:rgba(230,81,0,.82);"></span>Raízes Caninas</span>
+      <span><span class="legend-dot" style="background:rgba(21,101,192,.82);"></span>Taller Paseos Sin Frustración</span>
+      <span><span class="legend-dot" style="background:rgba(0,121,107,.82);"></span>Cachorros y perros jóvenes</span>
+      <span><span class="legend-dot" style="background:rgba(106,27,154,.82);"></span>Primeros Auxilios</span>
+    </div>
+  </div>
+  <div class="card">
+    <h3 data-t="h_projecao">Projeção de recorrência — 19 vendas × €77 × 6 meses</h3>
+    <p style="font-size:12px;color:var(--gray2);margin-bottom:.5rem;" data-t="mes1_realizado">Mês 1 já realizado (€1.463). Receita pendente: €7.315 nos próximos 5 meses.</p>
+    <div class="chart-wrap"><canvas id="recChart"></canvas></div>
+    <div class="chart-legend">
+      <span><span class="legend-dot" style="background:#85B7EB;"></span><span data-t="leg_mes1">Mês 1 (realizado)</span></span>
+      <span><span class="legend-dot" style="background:#B5D4F4;"></span><span data-t="leg_seguintes">Meses seguintes</span></span>
+      <span><span class="legend-line" style="background:#185FA5;"></span><span data-t="leg_acumulado">Acumulado</span></span>
+    </div>
+  </div>
+  <hr class="divider">
+  <div class="sec-header" style="margin-top:.5rem;">
+    <div class="sec-dot" style="background:var(--gray2);"></div>
+    <h2 data-t="h_outros">Outros Produtos</h2>
+    <span class="badge" data-t="badge_outros">Agregados ao lançamento</span>
+  </div>
+  <div class="card">
+    <div class="product-row">
+      <div class="product-accent" style="background:#F57F17;"></div>
+      <div class="product-info"><div class="name">Experiência VIP</div><div class="detail">49 vendas · €10/cada</div></div>
+      <div class="product-val" style="color:#F57F17;">€490</div>
+    </div>
+    <div class="product-row">
+      <div class="product-accent" style="background:var(--blue);"></div>
+      <div class="product-info"><div class="name">Taller Paseos Sin Frustración</div><div class="detail">11 vendas · €67/cada</div></div>
+      <div class="product-val" style="color:var(--blue);">€737</div>
+    </div>
+    <div class="product-row">
+      <div class="product-accent" style="background:var(--teal);"></div>
+      <div class="product-info"><div class="name">Cachorros y perros jóvenes</div><div class="detail">2 vendas · €45/cada</div></div>
+      <div class="product-val" style="color:var(--teal);">€90</div>
+    </div>
+    <div class="product-row">
+      <div class="product-accent" style="background:var(--purple);"></div>
+      <div class="product-info"><div class="name">Primeiros Auxilios Veterinários</div><div class="detail">1 venda · €18</div></div>
+      <div class="product-val" style="color:var(--purple);">€18</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;background:var(--gray4);margin:0 -1.5rem -1.25rem;padding:12px 1.5rem;border-radius:0 0 12px 12px;border-top:1px solid var(--gray3);">
+      <span style="font-size:14px;font-weight:700;color:var(--navy);" data-t="subtotal_outros">Subtotal outros produtos</span>
+      <span style="font-size:22px;font-weight:700;font-family:Georgia,serif;color:var(--navy);">€1.335</span>
+    </div>
+  </div>
+
+</section>
+
+<!-- ==================== CRIATIVOS & PÚBLICOS ==================== -->
+<!-- ==================== ORIGEM DAS VENDAS ==================== -->
+<section id="origem">
+  <div class="sec-header">
+    <div class="sec-dot" style="background:#1B5E20;"></div>
+    <h2 data-t="h_origem">Origem das Vendas</h2>
+    <span class="badge" data-t="badge_origem">CRM · UTM tracking · 63 transações</span>
+  </div>
+
+  <!-- KPIs canal -->
+  <div class="grid4" style="margin-bottom:1.25rem;">
+    <div class="metric hl-teal"><div class="lbl">Meta Ads</div><div class="val">16</div><div class="sub">€2.697 realizados · €5.777 adj.</div></div>
+    <div class="metric hl"><div class="lbl" data-t="direto_label">Direto / Sem UTM</div><div class="val">19</div><div class="sub">€2.921 realizados</div></div>
+    <div class="metric hl-purple"><div class="lbl">WhatsApp + Email</div><div class="val">12</div><div class="sub">€2.139 realizados</div></div>
+    <div class="metric hl-green"><div class="lbl" data-t="organico_label">Social + Instagram</div><div class="val">12</div><div class="sub">€1.371 realizados</div></div>
+  </div>
+
+  <!-- Gráfico de canais -->
+  <div class="card">
+    <h3 data-t="h_canais">Receita por Canal de Origem (€ realizados no ato)</h3>
+    <div class="chart-wrap" style="height:300px;"><canvas id="canalChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h3 data-t="h_canais_det">Detalhamento por Canal</h3>
+
+    <div style="background:#FFF8E1;border:1px solid #FFD54F;border-left:4px solid #F9A825;border-radius:8px;padding:12px 16px;font-size:12px;color:#5D4037;line-height:1.65;margin-bottom:1.25rem;" data-t="aviso_utm">
+      ⚠️ <strong>Importante sobre o rastreamento:</strong> Existem diversas vendas sem UTM — isso pode ocorrer quando o comprador usa um e-mail diferente do cadastro, quando o link de compra é acessado sem parâmetros, ou quando o pixel não captura a origem. Além disso, pode haver sobreposição de UTMs: se a mesma pessoa se cadastrou via anúncio e depois entrou novamente via WhatsApp, <strong>apenas a última UTM é contabilizada</strong>. Por isso, a relação de rastreamento é valiosa para insights estatísticos e análise de melhores anúncios e públicos, mas não deve ser interpretada como um valor exato de atribuição.
+    </div>
+
+    <table class="tbl">
+      <thead><tr>
+        <th data-t="th_canal">Canal</th>
+        <th style="text-align:right" data-t="th_vendas">Vendas</th>
+        <th style="text-align:right">Faturamento Total 6m (€)</th>
+        <th style="text-align:right">% Receita</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1976D2;margin-right:6px;"></span>Meta Ads</td><td class="val">16</td><td class="val" style="color:var(--green);font-weight:700;">€5.777</td><td class="val">33,3%</td></tr>
+        <tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#64748B;margin-right:6px;"></span><span data-t="direto_label">Direto / Sem UTM</span></td><td class="val">19</td><td class="val" style="color:var(--green);font-weight:700;">€4.846</td><td class="val">27,9%</td></tr>
+        <tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#00796B;margin-right:6px;"></span>WhatsApp</td><td class="val">7</td><td class="val" style="color:var(--green);font-weight:700;">€1.914</td><td class="val">11,0%</td></tr>
+        <tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#E65100;margin-right:6px;"></span>Email / Newsletter</td><td class="val">5</td><td class="val" style="color:var(--green);font-weight:700;">€1.765</td><td class="val">10,2%</td></tr>
+        <tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6A1B9A;margin-right:6px;"></span>Instagram / Manychat</td><td class="val">3</td><td class="val" style="color:var(--green);font-weight:700;">€1.311</td><td class="val">7,6%</td></tr>
+        <tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#90A4AE;margin-right:6px;"></span>Outro (ads anterior)</td><td class="val">4</td><td class="val" style="color:var(--green);font-weight:700;">€908</td><td class="val">5,2%</td></tr>
+        <tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#558B2F;margin-right:6px;"></span><span data-t="organico_label">Social Orgânico</span></td><td class="val">9</td><td class="val" style="color:var(--green);font-weight:700;">€830</td><td class="val">4,8%</td></tr>
+        <tr style="background:var(--blueL);font-weight:700;">
+          <td style="font-weight:700;color:var(--navy);">TOTAL</td>
+          <td class="val">63</td><td class="val" style="color:var(--green);font-weight:700;">€17.351</td><td class="val">100%</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px;color:var(--gray2);margin-top:.75rem;" data-t="nota_canais">* Faturamento Total 6m inclui o valor parcelado de €77 × 6 meses para vendas recorrentes de Raízes Caninas.</p>
+  </div>
+
+  <!-- Meta Ads: público e criativo que converteu -->
+  <div class="sub-sec">
+    <div class="sub-sec-title" data-t="h_meta_conv">Meta Ads — o que converteu em venda</div>
+
+      <!-- Públicos que converteram -->
+      <div class="card" style="margin-top:0;">
+        <h3 data-t="h_pub_conv">Públicos → Vendas</h3>
+        <table class="tbl">
+          <thead><tr>
+            <th data-t="th_publico">Público</th>
+            <th style="text-align:right">Vendas Rastreadas</th>
+            <th style="text-align:right">Faturamento Total (€)</th>
+            <th style="text-align:right">Investimento (€)</th>
+            <th style="text-align:right">CPL €</th>
+            <th style="text-align:right">ROAS</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="font-weight:600;">CI01-00-MIX_QUENTE</td><td class="val">7</td><td class="val" style="color:var(--green);font-weight:700;">€2.689</td><td class="val">€1.608</td><td class="val">€2,74</td><td class="val" style="color:var(--green);font-weight:700;">1,67×</td></tr>
+            <tr><td style="font-weight:600;">CI01-PERROS-ESP</td><td class="val">5</td><td class="val" style="color:var(--green);font-weight:700;">€1.315</td><td class="val">€2.374</td><td class="val">€3,09</td><td class="val" style="color:var(--orange);">0,55×</td></tr>
+            <tr><td style="font-weight:600;">CI01-PERROS_V2-ESP</td><td class="val">2</td><td class="val" style="color:var(--green);font-weight:700;">€924</td><td class="val">€1.114</td><td class="val">€3,21</td><td class="val" style="color:var(--orange);">0,83×</td></tr>
+            <tr><td style="font-weight:600;">CI01-01-ENVOLVIMENTO</td><td class="val">1</td><td class="val" style="color:var(--green);font-weight:700;">€387</td><td class="val">€49</td><td class="val">€24,43</td><td class="val" style="color:var(--green);font-weight:700;">7,90×</td></tr>
+            <tr><td style="font-weight:600;">CI01-ADVANTAGE-ESP</td><td class="val">1</td><td class="val" style="color:var(--green);font-weight:700;">€462</td><td class="val">€892</td><td class="val">€3,84</td><td class="val" style="color:var(--orange);">0,52×</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Criativos que converteram -->
+      <div class="card">
+        <h3 data-t="h_cr_conv">Criativos → Vendas</h3>
+        <table class="tbl">
+          <thead><tr>
+            <th>Criativo</th>
+            <th style="text-align:right">Vendas Rastreadas</th>
+            <th style="text-align:right">Faturamento Total (€)</th>
+            <th style="text-align:right">Investimento (€)</th>
+            <th style="text-align:right">CPL €</th>
+            <th style="text-align:right">ROAS</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="font-weight:600;">CAPT_VD04</td><td class="val">8</td><td class="val" style="color:var(--green);font-weight:700;">€2.381</td><td class="val">€2.338</td><td class="val">€2,67</td><td class="val">1,02×</td></tr>
+            <tr><td style="font-weight:600;">CAPT_VDIA01</td><td class="val">3</td><td class="val" style="color:var(--green);font-weight:700;">€1.386</td><td class="val">€606</td><td class="val">€2,87</td><td class="val" style="color:var(--green);font-weight:700;">2,29×</td></tr>
+            <tr><td style="font-weight:600;">CAPT_VDIA03</td><td class="val">2</td><td class="val" style="color:var(--green);font-weight:700;">€774</td><td class="val">€592</td><td class="val">€2,77</td><td class="val">1,31×</td></tr>
+            <tr><td style="font-weight:600;">CAPT_VD03</td><td class="val">1</td><td class="val" style="color:var(--green);font-weight:700;">€462</td><td class="val">€378</td><td class="val">€4,15</td><td class="val">1,22×</td></tr>
+            <tr><td style="font-weight:600;">CAPT_VD02</td><td class="val">1</td><td class="val" style="color:var(--green);font-weight:700;">€387</td><td class="val">€402</td><td class="val">€3,56</td><td class="val" style="color:var(--orange);">0,96×</td></tr>
+            <tr><td style="font-weight:600;">CAPT_VD06</td><td class="val">1</td><td class="val" style="color:var(--green);font-weight:700;">€387</td><td class="val">€35</td><td class="val">€11,67</td><td class="val" style="color:var(--green);font-weight:700;">11,06×</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:11px;color:var(--gray2);margin-top:.6rem;">* Inv. e CPL referentes ao total de leads gerados por cada criativo em Espanha, não apenas os que converteram.</p>
+      </div>
+  </div>
+
+  <div class="footnote" data-t="footnote_origem">Dados extraídos do CRM com correlação via UTMs. "Direto / Sem UTM" inclui vendas onde o parâmetro de rastreamento não foi capturado — pode incluir tráfego orgânico, acesso direto ou UTMs perdidos na jornada. Total de 63 linhas de transação (inclui upgrades e cross-sells do mesmo comprador).</div>
+</section>
+
+<section id="criativos">
+  <div class="sec-header">
+    <div class="sec-dot" style="background:#F57F17;"></div>
+    <h2 data-t="h_criativos">Criativos &amp; Públicos</h2>
+    <span class="badge" data-t="badge_criativos">Espanha vs LATAM · todos os valores em €</span>
+  </div>
+
+  <!-- ESPANHA -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+    <span style="background:#1565C0;color:#fff;font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;">🇪🇸 Espanha</span>
+    <span style="font-size:12px;color:var(--gray2);" data-t="esp_note">Campanhas -ESP e -EUA · vendas realizadas neste segmento</span>
+  </div>
+
+  <div class="card">
+    <h3 data-t="h_publicos_esp">🏆 Públicos — Espanha (por CPL €)</h3>
+    <table class="rank-tbl">
+      <thead><tr>
+        <th>#</th><th data-t="th_publico">Público</th>
+        <th style="text-align:right" data-t="th_leads">Leads</th>
+        <th style="text-align:right">CPL (€)</th>
+        <th style="text-align:right">CTR</th>
+        <th style="text-align:right">CPM (€)</th>
+        <th style="text-align:right">Inv. (€)</th>
+      </tr></thead>
+      <tbody id="audienceEspTbody"></tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:1.25rem;">
+    <h3 data-t="h_criativos_esp">🎨 Criativos — Espanha (por CPL €, mín. 5 leads)</h3>
+    <table class="creative-tbl" id="creativeEspGrid"></table>
+  </div>
+
+  <!-- LATAM -->
+  <div style="display:flex;align-items:center;gap:10px;margin-top:2.5rem;margin-bottom:1rem;">
+    <span style="background:#00796B;color:#fff;font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;">🌎 LATAM</span>
+    <span style="font-size:12px;color:var(--gray2);" data-t="latam_note">Campanhas -LATAM</span>
+  </div>
+  <div class="latam-note" data-t="latam_aviso">⚠️ O CPL do LATAM é estruturalmente inferior por conta do custo de mídia da região — porém não houve nenhuma conversão em venda. Estes dados servem para análise de criativo e não de eficiência comercial.</div>
+
+  <div class="card">
+    <h3 data-t="h_publicos_latam">Públicos — LATAM (por CPL €)</h3>
+    <table class="rank-tbl">
+      <thead><tr>
+        <th>#</th><th data-t="th_publico">Público</th>
+        <th style="text-align:right" data-t="th_leads">Leads</th>
+        <th style="text-align:right">CPL (€)</th>
+        <th style="text-align:right">CTR</th>
+        <th style="text-align:right">CPM (€)</th>
+        <th style="text-align:right">Inv. (€)</th>
+      </tr></thead>
+      <tbody id="audienceLatamTbody"></tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:1.25rem;">
+    <h3 data-t="h_criativos_latam">Criativos — LATAM (por CPL €, mín. 5 leads)</h3>
+    <table class="creative-tbl" id="creativeLatamGrid"></table>
+  </div>
+</section>
+
+<!-- ==================== RESUMO ==================== -->
+<section id="resumo">
+  <div class="dark-bg">
+    <h2 data-t="h_resumo_cons">RESUMO CONSOLIDADO</h2>
+    <h3 data-t="resumo_sub">Lançamento · Raízes Caninas · Mar–Abr 2026</h3>
+    <div class="summary-grid">
+      <div class="sum-card"><div class="lbl" data-t="leads_totais">Leads Totais</div><div class="val">2.386</div><div class="sub">USD 2.150 + EUR 236</div></div>
+      <div class="sum-card"><div class="lbl" data-t="total_vendas_res">Total de Vendas</div><div class="val">102</div><div class="sub">39 Raízes + 63 outros</div></div>
+      <div class="sum-card"><div class="lbl" data-t="inv_total">Investimento Total</div><div class="val">€6.384</div><div class="sub">USD + EUR em €</div></div>
+      <div class="sum-card"><div class="lbl" data-t="fat_realizado">Faturamento Realizado</div><div class="val">€10.538</div><div class="sub" data-t="ja_no_caixa">Já no caixa</div></div>
+      <div class="sum-card hl-green"><div class="lbl" data-t="fat_6m">Faturamento Total (6m)</div><div class="val">€17.853</div><div class="sub" data-t="realiz_mais_rec">Realizado + recorrência</div></div>
+      <div class="sum-card hl"><div class="lbl" data-t="roas_final">ROAS Final (6 meses)</div><div class="val">2,80×</div><div class="sub">€17.853 / €6.384</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h3 data-t="h_evolucao_roas">Evolução do ROAS</h3>
+    <div class="roas-row">
+      <div class="rlbl" data-t="roas_realizado">ROAS Realizado (no ato)</div>
+      <div class="roas-track"><div class="roas-fill" style="width:59%;background:var(--gray2);"></div></div>
+      <div class="rnum" style="color:var(--gray2);">1,65×</div>
+    </div>
+    <div class="roas-row">
+      <div class="rlbl" data-t="roas_final_bar">ROAS Final (6 meses)</div>
+      <div class="roas-track"><div class="roas-fill" style="width:100%;background:var(--green);"></div></div>
+      <div class="rnum" style="color:var(--green);">2,80×</div>
+    </div>
+  </div>
+  <div class="card">
+    <h3 data-t="h_composicao">Composição do faturamento total (€17.853)</h3>
+    <div class="chart-wrap" style="height:260px;"><canvas id="pieChart"></canvas></div>
+  </div>
+  <div class="footnote" data-t="footnote_resumo">Todos os valores em €. Conversão USD→EUR: $1 = €0,87 · Investimento para ROAS: €6.384,43 (valor oficial produção) · CTR por cliques no link · Recorrência: 19 × €77 × 6 meses = €8.778 total · €1.463 já realizados no ato</div>
+</section>
+
+<script>
+// ========== DATA ==========
+const dailyCombined = {
+  labels:["11/03","12/03","13/03","14/03","15/03","16/03","17/03","18/03","19/03","20/03","21/03","22/03","23/03","24/03","25/03","26/03","27/03","28/03"],
+  spend: [29.21,101.76,80.77,136.47,325.92,465.69,439.72,494.68,538.94,329.06,371.37,469.01,427.63,505.72,510.53,468.38,416.26,210.46],
+  leads: [1,15,10,63,150,146,145,152,170,145,141,140,131,155,138,277,289,118],
+  cpl:   [29.21,6.78,8.08,2.17,2.17,3.19,3.03,3.25,3.17,2.27,2.63,3.35,3.26,3.26,3.70,1.69,1.44,1.78],
+  cumCpl:[29.21,8.19,8.14,3.91,2.82,2.96,2.98,3.04,3.07,2.95,2.91,2.96,2.99,3.02,3.07,2.88,2.69,2.65]
+};
+const dailyUSD = {
+  labels:["11/03","12/03","13/03","14/03","15/03","16/03","17/03","18/03","19/03","20/03","21/03","22/03","23/03","24/03","25/03","26/03","27/03","28/03"],
+  leads: [1,15,10,63,150,146,145,152,151,125,110,121,103,125,117,257,260,99]
+};
+const dailyEUR = {
+  labels:["19/03","20/03","21/03","22/03","23/03","24/03","25/03","26/03","27/03","28/03"],
+  spend: [88.0,86.23,96.7,104.21,114.33,88.39,76.27,72.75,81.84,50.09],
+  leads: [19,20,31,19,28,30,21,20,29,19],
+  cpl:   [4.63,4.31,3.12,5.48,4.08,2.95,3.63,3.64,2.82,2.64],
+  cumCpl:[4.63,4.47,3.87,4.22,4.18,3.93,3.89,3.87,3.73,3.64]
+};
+const vendasData = {
+  labels:["28/03","29/03","30/03","31/03","01/04"],
+  raizes:[7404,3396,387,3246,1311],taller:[0,333,134,0,0],cachorros:[0,45,45,0,0],primeiros:[0,18,0,0,0]
+};
+const audESP = [
+  {name:'CI01-00-MIX_QUENTE',leads:586,cpl:2.74,ctr:1.72,cpm:7.40,spend:1608.30},
+  {name:'CI01-PERROS-ESP',leads:767,cpl:3.09,ctr:2.40,cpm:8.57,spend:2373.57},
+  {name:'CI01-PERROS_V2-ESP',leads:347,cpl:3.21,ctr:2.27,cpm:9.45,spend:1113.93},
+  {name:'CI01-ADVANTAGE-EUA',leads:7,cpl:3.81,ctr:3.17,cpm:29.12,spend:26.65},
+  {name:'CI01-ADVANTAGE-ESP',leads:232,cpl:3.84,ctr:2.62,cpm:9.55,spend:891.98},
+  {name:'CI01-PERROS-EUA',leads:5,cpl:5.79,ctr:2.45,cpm:22.89,spend:28.93},
+  {name:'CI01-00-SEGUIDORES',leads:5,cpl:5.83,ctr:2.26,cpm:7.86,spend:29.15},
+  {name:'CI01-01-ENVOLVIMENTO',leads:2,cpl:24.43,ctr:1.47,cpm:19.36,spend:48.85},
+];
+const audLATAM = [
+  {name:'CI01-ADVANTAGE-LATAM',leads:254,cpl:0.36,ctr:3.15,cpm:3.31,spend:92.53},
+  {name:'CI01-PERROS-LATAM',leads:181,cpl:0.36,ctr:3.89,cpm:4.01,spend:64.59},
+];
+const crESP = [
+  {name:'CAPT_VD04',leads:875,cpl:2.67,ctr:1.86,cpm:7.44,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/650285413_928833162855880_477612860926809882_n.jpg?_nc_cat=105&ccb=1-7&_nc_ohc=HQhclfO2lbQQ7kNvwHQVApv&_nc_oc=AdqL5nO5toS_iqHrISPRkDCvo99YBW-vVYpiMrMAZAEWwfmlb8IPhaJWy6EBf0Y3Nm4&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQH-YR_u7H-HCXNcCh28wOKBgWbywx533rMLsyX-glINY1GfJh2iBLQiIG25-hnntDY822Cipcc9&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af27-VaKzoRgIdlE1f7gKqmUweIiXU4Ynn0teKfAr7J-_A&oe=69DAD1FD'},
+  {name:'CAPT_VDIA03',leads:214,cpl:2.77,ctr:2.50,cpm:9.11,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/650389347_919442631019911_4664826607596856109_n.jpg?_nc_cat=110&ccb=1-7&_nc_ohc=5qAyNIxYnBkQ7kNvwFltT-9&_nc_oc=Adq5L76G0bYr4_Y6q0w0fXgFFykya9wqVLXEWBy66hhUYjpkQ5LarlazrrbwOW41qv4&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQEDenUOA-mmXTnrLN4mU99XYi9-S2t2PuIbwgCs-R0FnGkmzxcojLtPnTxpNcuhQWD9cFfit1iU&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af0lZxODjMs88-nP0Z82RnC8OAEneabEAU3vHb-nyp2DGw&oe=69DAF5CB'},
+  {name:'CAPT_VDIA01',leads:211,cpl:2.87,ctr:3.11,cpm:11.99,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/649237798_953630363701178_7291907721787997811_n.jpg?_nc_cat=107&ccb=1-7&_nc_ohc=SI2WnFjPXJYQ7kNvwEbDGVE&_nc_oc=AdqL7oW2BuXmhP2t6gnSEh66czMt9PvejGLvSS52Qwlb29BlPORrG324Me6jU4tQRQk&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQGgdcvTwtMlRigjDM4ObFEpZcP4vwqzeCAduyzfPY8OCOnmcrb2vSk7UwdYhehJWiICpzj8E4gp&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af3Qw6JVzo0YlHo1saxPvh0t-P81HWS9-3TJhFFqzDviBw&oe=69DAEB81'},
+  {name:'CAPT_VDIA02',leads:75,cpl:2.92,ctr:2.71,cpm:12.21,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/651005667_2664727993910311_5534398178182965187_n.jpg?_nc_cat=107&ccb=1-7&_nc_ohc=bTuBbYufy7UQ7kNvwHtxxez&_nc_oc=AdoJ6P1l2TGZ5IEjWYUhrf8uQjyQq-E8mocO_LmakSpDup16VFqMP4kR0AILe5RYUlo&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQEdk1ZMe9VBZtH8kmIMaUiE84EYgmGwO1riBpiOPOq0OQRbpvNES38fWu-iMe5ESeYdMtbT9lkU&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af2wZ_2zgHNBLDZh_3YgufpTUzeFgJDTaXMGYXHFyQ9UlQ&oe=69DAF67C'},
+  {name:'CAPT_IMG05',leads:63,cpl:3.18,ctr:1.22,cpm:5.45,thumb:'https://external.xx.fbcdn.net/emg1/v/t13/2577689976702866336?url=https%3A%2F%2Fwww.facebook.com%2Fads%2Fimage%2F%3Fd%3DAQJv0a5m-yvZnOeGHuanLYv5BaGvfyk7jlH-bZse875Xlg91X8HNiPedoi-NNjc0-kZCMbA2O2UM9IGrw-g9kWz4yYSylvS46y55uWvOD3M5HwQktNTOKEwMT4klSB73CTd6-wYrjMmQFvBrhHkmZnK2&fb_obo=1&utld=facebook.com&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_oc=AdrKyHwGsuZaR34QCsfO-TTCEwBpSs3tDkPA_GYwVwibHv5BmsxhHxMq99gmqNAeS2w&ccb=13-1&oh=06_Q3-9AdR5g1Ut33jyjskmdi1mgp8xGvDQfDJMXjHZhR8X3-Bo&oe=69D6CC6C&_nc_sid=58080a'},
+  {name:'CAPT_VDIA04',leads:108,cpl:3.39,ctr:3.03,cpm:9.78,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/649845986_962130129685671_5541245563314114267_n.jpg?_nc_cat=108&ccb=1-7&_nc_ohc=HaSGlqR_2r0Q7kNvwEg4SYI&_nc_oc=AdqwVGL30KwQ_5wJyikykgmbf2lA3lYvi5USLFVkThMLOg0IhkDvREsUeHAjpwN8zTU&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQGKFE0MnDRhe8It2OOv1nkvuvIDHpinjUgVTHfauzBwOb5GYCAyqHdggecwekiQSCj-qDXDVj5S&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af0EKYVoBUzbURcYkZdSm6wTLRsMIsNZxEyana65m3PEYw&oe=69DAEC15'},
+  {name:'CAPT_VD04 - Copy',leads:71,cpl:3.50,ctr:3.44,cpm:7.56,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/650708248_1225191992704478_7416391158178473538_n.jpg?_nc_cat=102&ccb=1-7&_nc_ohc=jdUxjK6iutAQ7kNvwGZDruR&_nc_oc=AdrKR9omsFIgeAtC-Y05aGDhzmRpDy8tYKI9M1JeJ9WPDUliemfyAy_5XzL5vwBPIxs&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=9jfxQr4cq2R76_6d95oecQ&_nc_tpa=Q5bMBQHoHAYMgmUlVkfTCglzzsUcDwq-jKRsYhL575bGgW2EqkQuv-Dza-dOS2N1aGAvQGyGwYqO_KaY&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af0XA6e2hr6TtUu6brOnwmOuPHZ8AEnByOBzyNBkApU7UA&oe=69DAD1BE'},
+  {name:'CAPT_VD02 - Copy',leads:10,cpl:3.52,ctr:3.96,cpm:9.24,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/649690777_2110466246457423_5163820141719096485_n.jpg?_nc_cat=106&ccb=1-7&_nc_ohc=a5D6sUWV3TcQ7kNvwEZSY0N&_nc_oc=AdpXxwVIzneNJYB0dsy_zwBrm1k0AiQmaFYUmte5vYlC6W2JvzVwchyg_KO6cy_Sy0A&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQFVq1sCHsvMDXCmdNI1p6IGFmJmW4ocB5fC7OGucqMh4i2--RmIVs4hGeej47Duo7Ab6Di2jJkZ&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af3SRyMHVQ6y8CSkjiETdZ89Sx4LLhaSV1MwqPLphmnpSw&oe=69DAF283'},
+  {name:'CAPT_VD02',leads:113,cpl:3.56,ctr:1.97,cpm:9.83,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/649690777_2110466246457423_5163820141719096485_n.jpg?_nc_cat=106&ccb=1-7&_nc_ohc=a5D6sUWV3TcQ7kNvwEZSY0N&_nc_oc=AdpXxwVIzneNJYB0dsy_zwBrm1k0AiQmaFYUmte5vYlC6W2JvzVwchyg_KO6cy_Sy0A&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQGLrIq-K5fDJrhH7i-QbQXMO5F2w24hS_1gMVmvD7ChkZLWUkRUNdD5lXbAc1SXIWTX9tRcR9FM&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af0acFotoal3JVrr2UiQTAr_UUriYRo2hcSmVWkNOEM75g&oe=69DAF283'},
+  {name:'CAPT_VDIA04 - Copy',leads:5,cpl:3.64,ctr:3.14,cpm:15.46,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/649845986_962130129685671_5541245563314114267_n.jpg?_nc_cat=108&ccb=1-7&_nc_ohc=HaSGlqR_2r0Q7kNvwEg4SYI&_nc_oc=AdqwVGL30KwQ_5wJyikykgmbf2lA3lYvi5USLFVkThMLOg0IhkDvREsUeHAjpwN8zTU&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQGKFE0MnDRhe8It2OOv1nkvuvIDHpinjUgVTHfauzBwOb5GYCAyqHdggecwekiQSCj-qDXDVj5S&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af0EKYVoBUzbURcYkZdSm6wTLRsMIsNZxEyana65m3PEYw&oe=69DAEC15'},
+];
+const crLATAM = [
+  {name:'CAPT_VD02',leads:5,cpl:0.20,ctr:4.09,cpm:3.72,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/649690777_2110466246457423_5163820141719096485_n.jpg?_nc_cat=106&ccb=1-7&_nc_ohc=a5D6sUWV3TcQ7kNvwEZSY0N&_nc_oc=AdpXxwVIzneNJYB0dsy_zwBrm1k0AiQmaFYUmte5vYlC6W2JvzVwchyg_KO6cy_Sy0A&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQHYmFfxM9vUTmPPFr5k1p8wfXaEvrQCXylxEhPQx0k9_5Hq3YQR8KTMUTvd5DcfnyG9c50ptPPn&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af0DrUL4KwvdxIYIdk1acxEBUwgreFL0sh5v77xUlc4n3w&oe=69DAF283'},
+  {name:'CAPT_VDIA01',leads:195,cpl:0.28,ctr:5.23,cpm:5.02,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/649237798_953630363701178_7291907721787997811_n.jpg?_nc_cat=107&ccb=1-7&_nc_ohc=SI2WnFjPXJYQ7kNvwEbDGVE&_nc_oc=AdqL7oW2BuXmhP2t6gnSEh66czMt9PvejGLvSS52Qwlb29BlPORrG324Me6jU4tQRQk&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQF_nytKlhv9v4ugFFD3fOFAjmQPxlfDnHro6FHFAQunHY12JN7um_KGYosGuizNS51vGtrCPWiI&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af2vpY434YctuHHYbCIZGaH70Eb5JSt1El3ZhXmt4SHOvg&oe=69DAEB81'},
+  {name:'CAPT_VDIA03',leads:102,cpl:0.33,ctr:4.50,cpm:3.76,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/650389347_919442631019911_4664826607596856109_n.jpg?_nc_cat=110&ccb=1-7&_nc_ohc=5qAyNIxYnBkQ7kNvwFltT-9&_nc_oc=Adq5L76G0bYr4_Y6q0w0fXgFFykya9wqVLXEWBy66hhUYjpkQ5LarlazrrbwOW41qv4&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQE3alc5STr8RnTa3xcjvaTwnqKgkLg-8QAjHpTLUFi0kLuhkimFn5y_K89kKRmyZXZ1CLlDTomc&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af3NaLoj--fx6mWDzXtTCpVW8MfrWuZtdOQsUfAb9bRG4Q&oe=69DAF5CB'},
+  {name:'CAPT_VDIA04 - Copy',leads:5,cpl:0.35,ctr:4.45,cpm:5.21,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/649845986_962130129685671_5541245563314114267_n.jpg?_nc_cat=108&ccb=1-7&_nc_ohc=HaSGlqR_2r0Q7kNvwEg4SYI&_nc_oc=AdqwVGL30KwQ_5wJyikykgmbf2lA3lYvi5USLFVkThMLOg0IhkDvREsUeHAjpwN8zTU&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQEghb3now2cBc-M1hoP3UToQSBy87-6hLyF6I3-dZ8Wq4aAqx1G6hXtRYcxDhaWYeHggT_9-vqr&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af1FroVYU3hddLR-0VNe6k7XDU2LIkoHVeI1JAz55_d_GA&oe=69DAEC15'},
+  {name:'CAPT_VDIA05',leads:9,cpl:0.37,ctr:4.52,cpm:4.79,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/649545311_944592788470906_5442029322795048724_n.jpg?_nc_cat=107&ccb=1-7&_nc_ohc=oDRYfQMhuhoQ7kNvwGgryoo&_nc_oc=AdpRvagaCObr0je_n7pN-ND2et6UZ2OvFw6ePKq9LuDpA_Va7UfxBzf6fS8dl75qjqk&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQEk0UiHEIK7MBQed66lEKnLduku-EaQlxFaU89WQDsx8Akq85W0-j38LxU03p1I-gdWgw66hAJa&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=5fad0e&_nc_sid=58080a&oh=00_Af0FFzrO-tN0VB3IXWMSzVw5RbW4Tcb_z5IWccRlflOWsg&oe=69DAEA11'},
+  {name:'CAPT_VD04',leads:64,cpl:0.49,ctr:2.66,cpm:3.63,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/650285413_928833162855880_477612860926809882_n.jpg?_nc_cat=105&ccb=1-7&_nc_ohc=HQhclfO2lbQQ7kNvwHQVApv&_nc_oc=AdqL5nO5toS_iqHrISPRkDCvo99YBW-vVYpiMrMAZAEWwfmlb8IPhaJWy6EBf0Y3Nm4&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQGwYfpj1Nmi9zMKsAjTT3-BvoV0Q9NQJaWl3QM8XLpKbOEvqMYu6Ft5vK7tZd6vsqpO6gS-GS1g&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af074kir4tGBkx4CSBykH_aElrDQcrOA52eK4tK42H-kTQ&oe=69DAD1FD'},
+  {name:'CAPT_IMG05',leads:41,cpl:0.54,ctr:1.42,cpm:1.84,thumb:'https://external.xx.fbcdn.net/emg1/v/t13/18440143149628469263?url=https%3A%2F%2Fwww.facebook.com%2Fads%2Fimage%2F%3Fd%3DAQKgWnHAKksRwl4bVSMNJLTBOKMpDKwrlaNR1LjYS3-1xRL9sSMrme_YWUQUNGehd8CI4WcWW-RN_EYuaw4mfRdzwb5eiBKHcKNOwlla-X00zHOUV9t58fwthvoqsBQOH6hG4DRIbeono5VoVwYIl86z&fb_obo=1&utld=facebook.com&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_oc=Adr0nUKBkOj0bv34qH4hyw3nWwrghxnn3aGfI0mn5yaP-ZhZEUddkR8SE1fB97eAtrA&ccb=13-1&oh=06_Q3-9Acuw0fYUFA2DP5OVlvj77MwXj4dvjyCIj9JYp7yXRnfJ&oe=69D6D66B&_nc_sid=58080a'},
+  {name:'CAPT_VDIA04',leads:5,cpl:0.58,ctr:4.38,cpm:5.52,thumb:'https://scontent.xx.fbcdn.net/v/t15.5256-10/649845986_962130129685671_5541245563314114267_n.jpg?_nc_cat=108&ccb=1-7&_nc_ohc=HaSGlqR_2r0Q7kNvwEg4SYI&_nc_oc=AdqwVGL30KwQ_5wJyikykgmbf2lA3lYvi5USLFVkThMLOg0IhkDvREsUeHAjpwN8zTU&_nc_zt=23&_nc_ht=scontent.xx&edm=AOgd6ZUEAAAA&_nc_gid=RJ2CoeIH5Y7hZCY-01ardA&_nc_tpa=Q5bMBQGqzYxfTI62APAEArfXtbqfkud60MxUhRr0DOJmirLPGmOlXI-IqI9GFmTscwDn5sy40ip5w13S&stp=c0.5000x0.5000f_dst-emg0_q75_tt6&ur=b696e2&_nc_sid=58080a&oh=00_Af1G-TNAVctRyKBvwGduAjU6-DPUhAa-KcaA4B-m0g3CMw&oe=69DAEC15'},
+];
+
+// ========== TRANSLATIONS ==========
+const T={
+  pt:{
+    nav_visao:'Visão Geral',nav_captacao:'Captação',nav_origem:'Origem das Vendas',nav_vendas:'Vendas',nav_criativos:'Criativos & Públicos',nav_resumo:'Resumo',
+    cover_tag:'DEBRIEFING · MAR–ABR 2026',cover_sub:'Tráfego · Captação · Vendas · ROAS',roas_final_lbl:'ROAS final (6 meses)',
+    h_visao_geral:'Visão Geral Financeira',badge_consolidado:'Lançamento consolidado em €',
+    inv_total:'Investimento Total',fat_realizado:'Faturamento Realizado',fat_6m:'Faturamento Total (6m)',incl_rec:'Incl. recorrência',
+    roas_final:'ROAS Final (6 meses)',receita_caixa:'Já no caixa',
+    h_evolucao_roas:'Evolução do ROAS',roas_realizado:'ROAS Realizado (no ato)',roas_final_bar:'ROAS Final (6 meses)',
+    h_leads:'Leads Captados',conta_usd:'Conta USD',conta_eur:'Conta EUR',total_leads:'Total de Leads',campanhas_total:'7 campanhas no total',
+    footnote_visao:'Todos os valores em €. Conversão USD→EUR: $1 = €0,87 · $6.369 × 0,87 = €5.541 + €859 = €6.400 · Valor oficial produção: €6.384,43 · Recorrência: 21 × €77 × 6 meses',
+    h_captacao:'Captação — Visão Consolidada',badge_captacao:'Meta Ads · USD + EUR · tudo em €',
+    inv_total_cap:'Investimento Total',leads_captados:'Leads Captados',duas_contas:'2 contas ativas',alcance:'Alcance total',
+    cliques_total:'≈17.370 cliques no link',impressoes_total:'≈769K impressões',
+    h_diario_cap:'Volume Diário — Leads, Investimento e CPL',
+    leg_leads:'Volume de Leads',leg_invest:'Investimento (€)',leg_cpl:'CPL diário (€)',leg_cpl_acum:'CPL acumulado',
+    investimento:'Investimento',usd_conv:'convertido p/ € ($1 = €0,87)',eur_nativa:'já em euro nativo',
+    metricas_eur:'Métricas da conta EUR',th_campanha:'Campanha',th_leads:'Leads',th_investido:'€ Inv.',h_resumo_contas:'Resumo por Conta',
+    h_vendas:'Vendas',badge_vendas:'Raízes Caninas + outros produtos',
+    preco_cheio_lbl:'Preço Cheio (€387)',parcelado_lbl:'Parcelado (€77 × 6)',total_rc:'Total Raízes Caninas',
+    total_vendas:'Total de vendas',realizado:'Realizado',rec_pendente:'Recorrência pendente',total_6m:'Total 6 meses',
+    h_vendas_diarias:'Vendas Diárias por Produto (€)',
+    h_projecao:'Projeção de recorrência — 19 vendas × €77 × 6 meses',
+    mes1_realizado:'Mês 1 já realizado (€1.463). Receita pendente: €7.315 nos próximos 5 meses.',
+    leg_mes1:'Mês 1 (realizado)',leg_seguintes:'Meses seguintes',leg_acumulado:'Acumulado',
+    h_outros:'Outros Produtos',badge_outros:'Agregados ao lançamento',subtotal_outros:'Subtotal outros produtos',
+    h_criativos:'Criativos & Públicos',badge_criativos:'Espanha vs LATAM · todos os valores em €',
+    esp_note:'Campanhas -ESP e -EUA · vendas realizadas neste segmento',
+    latam_note:'Campanhas -LATAM',
+    latam_aviso:'⚠️ O CPL do LATAM é estruturalmente inferior por conta do custo de mídia da região — porém não houve nenhuma conversão em venda. Estes dados servem para análise de criativo e não de eficiência comercial.',
+    h_publicos_esp:'🏆 Públicos — Espanha (por CPL €)',th_publico:'Público',
+    h_criativos_esp:'🎨 Criativos — Espanha (por CPL €, mín. 5 leads)',
+    h_publicos_latam:'Públicos — LATAM (por CPL €)',
+    h_criativos_latam:'Criativos — LATAM (por CPL €, mín. 5 leads)',
+    h_resumo_cons:'RESUMO CONSOLIDADO',resumo_sub:'Lançamento · Raízes Caninas · Mar–Abr 2026',
+    leads_totais:'Leads Totais',total_vendas_res:'Total de Vendas',ja_no_caixa:'Já no caixa',realiz_mais_rec:'Realizado + recorrência',
+    h_composicao:'Composição do faturamento total (€17.853)',
+    footnote_resumo:'Todos os valores em €. Conversão USD→EUR: $1 = €0,87 · Investimento para ROAS: €6.384,43 · Recorrência: 19 × €77 × 6 meses = €8.778 total · €1.463 já realizados no ato',
+    // Origem
+    h_origem:'Origem das Vendas',badge_origem:'CRM · UTM tracking · 63 transações',
+    direto_label:'Direto / Sem UTM',organico_label:'Social Orgânico',
+    h_canais:'Receita por Canal de Origem (€ realizados no ato)',
+    h_canais_det:'Detalhamento por Canal',th_canal:'Canal',th_vendas:'Vendas',th_adj:'€ Ajustado (6m)',
+    nota_canais:'* Ajustado: vendas parceladas de €77 multiplicadas por 6. Direto/Sem UTM inclui orgânico e rastreamento não capturado.',
+    h_meta_conv:'Meta Ads — o que converteu em venda',h_pub_conv:'Públicos → Vendas',h_cr_conv:'Criativos → Vendas',
+    h_rc_canal:'Raízes Caninas — Origem das 37 Vendas',
+    footnote_origem:'Dados extraídos do CRM com correlação via UTMs. "Direto/Sem UTM" inclui vendas onde o rastreamento não foi capturado. Total de 63 linhas (inclui upgrades e cross-sells do mesmo comprador).',
+    aviso_utm:'⚠️ Importante sobre o rastreamento: Existem diversas vendas sem UTM — isso pode ocorrer quando o comprador usa um e-mail diferente do cadastro, quando o link de compra é acessado sem parâmetros, ou quando o pixel não captura a origem. Além disso, pode haver sobreposição de UTMs: se a mesma pessoa se cadastrou via anúncio e depois entrou novamente via WhatsApp, apenas a última UTM é contabilizada. Por isso, a relação de rastreamento é valiosa para insights estatísticos e análise de melhores anúncios e públicos, mas não deve ser interpretada como um valor exato de atribuição.',
+    chart_mes:'Mês',pie_cheio:'Raízes Caninas (preço cheio)',pie_parcel:'Raízes Caninas (parcelado)',pie_outros:'Outros produtos',
+    h_atrib:'Origem das Vendas — Atribuição',badge_atrib:'UTM Medium via Hotmart SCK',
+    atrib_aviso:'⚠️ Limitação de rastreio: A plataforma (Hotmart) registra UTM apenas quando o link é clicado com parâmetros. Vendas via tráfego pago sem UTM configurado aparecem como sem origem. Das 47 vendas, 36 (76%) chegaram sem UTM — o que é esperado e indica compra direta via anúncio ou orgânica.',
+    origem_direto:'Sem UTM rastreado',origem_email:'Newsletter / Email',origem_conv:'Conv. de leads (esp.)',origem_conv_sub:'1.949 leads ESP · 36 vendas s/ UTM',
+    h_origem_tabela:'📊 Breakdown por Canal (UTM Medium)',th_canal:'Canal',th_vendas_n:'Vendas',th_receita_atrib:'Receita €',th_ticket:'Ticket médio',th_obs:'Obs.',
+    canal_ads:'Tráfego pago / Direto',obs_ads:'Ads + orgânico sem param.',obs_email:'4 emails diferentes',total_geral:'Total',
+    h_emails_camp:'Campanhas de e-mail com conversão',th_email_camp:'Assunto do e-mail',th_produto_email:'Produto',
+    h_conv_publico:'🎯 Estimativa de Conversão por Público — Espanha',
+    conv_nota:'ℹ️ Como os UTMs de ads não foram configurados no checkout, a atribuição direta por público não é possível. A tabela abaixo usa as 36 vendas sem UTM distribuídas proporcionalmente pelo volume de leads de cada público (estimativa de referência).',
+    th_vendas_est:'Vendas est.',th_conv_est:'Conv. est.',th_cpv_est:'CPV est. €',
+    conv_disclaimer:'* Estimativa baseada em distribuição proporcional de leads. CPV = Investimento / Vendas estimadas. Dados reais requerem UTM configurado no checkout.',
+  },
+  es:{
+    nav_visao:'Visión General',nav_captacao:'Captación',nav_origem:'Origen de Ventas',nav_vendas:'Ventas',nav_criativos:'Creativos & Públicos',nav_resumo:'Resumen',
+    cover_tag:'DEBRIEFING · MAR–ABR 2026',cover_sub:'Tráfico · Captación · Ventas · ROAS',roas_final_lbl:'ROAS final (6 meses)',
+    h_visao_geral:'Visión General Financiera',badge_consolidado:'Lanzamiento consolidado en €',
+    inv_total:'Inversión Total',fat_realizado:'Facturación Realizada',fat_6m:'Facturación Total (6m)',incl_rec:'Incl. recurrencia',
+    roas_final:'ROAS Final (6 meses)',receita_caixa:'Ya en caja',
+    h_evolucao_roas:'Evolución del ROAS',roas_realizado:'ROAS Realizado (al momento)',roas_final_bar:'ROAS Final (6 meses)',
+    h_leads:'Leads Captados',conta_usd:'Cuenta USD',conta_eur:'Cuenta EUR',total_leads:'Total de Leads',campanhas_total:'7 campañas en total',
+    footnote_visao:'Todos los valores en €. Conversión USD→EUR: $1 = €0,87 · $6.369 × 0,87 = €5.541 + €859 = €6.400 · Valor oficial producción: €6.384,43 · Recurrencia: 21 × €77 × 6 meses',
+    h_captacao:'Captación — Visión Consolidada',badge_captacao:'Meta Ads · USD + EUR · todo en €',
+    inv_total_cap:'Inversión Total',leads_captados:'Leads Captados',duas_contas:'2 cuentas activas',alcance:'Alcance total',
+    cliques_total:'≈17.370 clics en el enlace',impressoes_total:'≈769K impresiones',
+    h_diario_cap:'Volumen Diario — Leads, Inversión y CPL',
+    leg_leads:'Volumen de Leads',leg_invest:'Inversión (€)',leg_cpl:'CPL diario (€)',leg_cpl_acum:'CPL acumulado',
+    investimento:'Inversión',usd_conv:'convertido a € ($1 = €0,87)',eur_nativa:'ya en euro nativo',
+    metricas_eur:'Métricas de la cuenta EUR',th_campanha:'Campaña',th_leads:'Leads',th_investido:'€ Inv.',h_resumo_contas:'Resumen por Cuenta',
+    h_vendas:'Ventas',badge_vendas:'Raíces Caninas + otros productos',
+    preco_cheio_lbl:'Precio Completo (€387)',parcelado_lbl:'En cuotas (€77 × 6)',total_rc:'Total Raíces Caninas',
+    total_vendas:'Total de ventas',realizado:'Realizado',rec_pendente:'Recurrencia pendiente',total_6m:'Total 6 meses',
+    h_vendas_diarias:'Ventas Diarias por Producto (€)',
+    h_projecao:'Proyección de recurrencia — 19 ventas × €77 × 6 meses',
+    mes1_realizado:'Mes 1 ya realizado (€1.463). Ingresos pendientes: €7.315 en los próximos 5 meses.',
+    leg_mes1:'Mes 1 (realizado)',leg_seguintes:'Meses siguientes',leg_acumulado:'Acumulado',
+    h_outros:'Otros Productos',badge_outros:'Agregados al lanzamiento',subtotal_outros:'Subtotal otros productos',
+    h_criativos:'Creativos & Públicos',badge_criativos:'España vs LATAM · todos los valores en €',
+    esp_note:'Campañas -ESP y -EUA · ventas realizadas en este segmento',
+    latam_note:'Campañas -LATAM',
+    latam_aviso:'⚠️ El CPL del LATAM es estructuralmente inferior por el costo de medios de la región — sin embargo no hubo ninguna conversión en venta. Estos datos sirven para análisis de creativos y no de eficiencia comercial.',
+    h_publicos_esp:'🏆 Públicos — España (por CPL €)',th_publico:'Público',
+    h_criativos_esp:'🎨 Creativos — España (por CPL €, mín. 5 leads)',
+    h_publicos_latam:'Públicos — LATAM (por CPL €)',
+    h_criativos_latam:'Creativos — LATAM (por CPL €, mín. 5 leads)',
+    h_resumo_cons:'RESUMEN CONSOLIDADO',resumo_sub:'Lanzamiento · Raíces Caninas · Mar–Abr 2026',
+    leads_totais:'Leads Totales',total_vendas_res:'Total de Ventas',ja_no_caixa:'Ya en caja',realiz_mais_rec:'Realizado + recurrencia',
+    h_composicao:'Composición de la facturación total (€17.853)',
+    footnote_resumo:'Todos los valores en €. Conversión USD→EUR: $1 = €0,87 · Inversión para ROAS: €6.384,43 · Recurrencia: 19 × €77 × 6 meses = €8.778 total · €1.463 ya realizados al contratar',
+    // Origen
+    h_origem:'Origen de las Ventas',badge_origem:'CRM · UTM tracking · 63 transacciones',
+    direto_label:'Directo / Sin UTM',organico_label:'Social Orgánico',
+    h_canais:'Ingresos por Canal de Origen (€ realizados al momento)',
+    h_canais_det:'Desglose por Canal',th_canal:'Canal',th_vendas:'Ventas',th_adj:'€ Ajustado (6m)',
+    nota_canais:'* Ajustado: ventas en cuotas de €77 multiplicadas por 6. Directo/Sin UTM incluye orgánico y rastreo no capturado.',
+    h_meta_conv:'Meta Ads — lo que convirtió en venta',h_pub_conv:'Públicos → Ventas',h_cr_conv:'Creativos → Ventas',
+    h_rc_canal:'Raíces Caninas — Origen de las 37 Ventas',
+    footnote_origem:'Datos extraídos del CRM con correlación vía UTMs. "Directo/Sin UTM" incluye ventas donde el rastreo no fue capturado. Total de 63 líneas (incluye upgrades y cross-sells del mismo comprador).',
+    aviso_utm:'⚠️ Importante sobre el rastreo: Existen diversas ventas sin UTM — esto puede ocurrir cuando el comprador usa un e-mail diferente al del registro, cuando el enlace de compra es accedido sin parámetros, o cuando el píxel no captura el origen. Además, puede haber sobreposición de UTMs: si la misma persona se registró vía anuncio y luego volvió a entrar vía WhatsApp, solo se contabiliza la última UTM. Por eso, la relación de rastreo es valiosa para insights estadísticos y análisis de mejores anuncios y públicos, pero no debe interpretarse como un valor exacto de atribución.',
+    chart_mes:'Mes',pie_cheio:'Raíces Caninas (precio completo)',pie_parcel:'Raíces Caninas (en cuotas)',pie_outros:'Otros productos',
+    h_atrib:'Origen de Ventas — Atribución',badge_atrib:'UTM Medium via Hotmart SCK',
+    atrib_aviso:'⚠️ Limitación de rastreo: La plataforma (Hotmart) registra UTMs solo cuando el enlace es clicado con parámetros. Ventas vía tráfico pago sin UTM configurado aparecen como sin origen. De las 47 ventas, 36 (76%) llegaron sin UTM — lo cual es esperado e indica compra directa vía anuncio u orgánica.',
+    origen_direto:'Sin UTM rastreado',origen_email:'Newsletter / Email',origen_conv:'Conv. de leads (esp.)',origen_conv_sub:'1.949 leads ESP · 36 ventas s/ UTM',
+    h_origem_tabela:'📊 Breakdown por Canal (UTM Medium)',th_canal:'Canal',th_vendas_n:'Ventas',th_receita_atrib:'Ingresos €',th_ticket:'Ticket promedio',th_obs:'Obs.',
+    canal_ads:'Tráfico pago / Directo',obs_ads:'Ads + orgánico sin param.',obs_email:'4 emails distintos',total_geral:'Total',
+    h_emails_camp:'Campañas de e-mail con conversión',th_email_camp:'Asunto del e-mail',th_produto_email:'Producto',
+    h_conv_publico:'🎯 Estimación de Conversión por Público — España',
+    conv_nota:'ℹ️ Como los UTMs de ads no fueron configurados en el checkout, la atribución directa por público no es posible. La tabla usa las 36 ventas sin UTM distribuidas proporcionalmente por volumen de leads de cada público (estimación de referencia).',
+    th_vendas_est:'Ventas est.',th_conv_est:'Conv. est.',th_cpv_est:'CPV est. €',
+    conv_disclaimer:'* Estimación basada en distribución proporcional de leads. CPV = Inversión / Ventas estimadas. Datos reales requieren UTM configurado en el checkout.',
+  }
+};
+
+let currentLang='es',recChart=null,pieChart=null;
+function setLang(lang){
+  currentLang=lang;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent.trim().toLowerCase()===lang));
+  const t=T[lang];
+  document.querySelectorAll('[data-t]').forEach(el=>{const k=el.getAttribute('data-t');if(t[k]!=null)el.textContent=t[k];});
+  document.querySelectorAll('[data-nav]').forEach(el=>{const k=el.getAttribute('data-nav');if(t[k]!=null)el.textContent=t[k];});
+  if(recChart){recChart.data.labels=[1,2,3,4,5,6].map(n=>t.chart_mes+' '+n);recChart.update();}
+  if(pieChart){pieChart.data.labels=[t.pie_cheio,t.pie_parcel,t.pie_outros];pieChart.update();}
+}
+document.querySelectorAll('#navLinks a').forEach(a=>{
+  a.addEventListener('click',function(e){
+    e.preventDefault();
+    document.querySelectorAll('#navLinks a').forEach(x=>x.classList.remove('active'));
+    this.classList.add('active');
+    document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(this.getAttribute('data-sec')).classList.add('active');
+  });
+});
+// Default language
+setLang('es');
+
+// ========== CHARTS ==========
+// Main daily combined chart
+new Chart(document.getElementById('dailyCapChart'),{
+  type:'bar',
+  data:{
+    labels:dailyCombined.labels,
+    datasets:[
+      {label:'Leads',data:dailyCombined.leads,backgroundColor:'rgba(30,136,229,0.7)',borderRadius:4,yAxisID:'yL',order:4},
+      {label:'Investimento (€)',data:dailyCombined.spend,type:'line',borderColor:'#2E7D32',backgroundColor:'transparent',pointBackgroundColor:'#2E7D32',pointRadius:3,tension:0.3,yAxisID:'yM',order:1,borderWidth:2},
+      {label:'CPL diário (€)',data:dailyCombined.cpl,type:'line',borderColor:'#111111',backgroundColor:'transparent',pointRadius:0,tension:0.5,yAxisID:'yCPL',order:2,borderWidth:2.5},
+      {label:'CPL acumulado',data:dailyCombined.cumCpl,type:'line',borderColor:'rgba(0,0,0,0.22)',backgroundColor:'transparent',pointRadius:0,tension:0.5,yAxisID:'yCPL',order:3,borderWidth:1.5,borderDash:[5,4]}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{
+      if(ctx.dataset.label==='Leads')return' '+ctx.parsed.y+' leads';
+      return' €'+ctx.parsed.y.toFixed(2);
+    }}}},
+    scales:{
+      yL:{type:'linear',position:'left',ticks:{color:'#1E88E5',font:{size:11},callback:v=>v+' leads'},grid:{color:'rgba(30,136,229,0.07)'}},
+      yM:{type:'linear',position:'right',ticks:{color:'#2E7D32',font:{size:11},callback:v=>'€'+v},grid:{display:false}},
+      yCPL:{type:'linear',position:'right',display:false},
+      x:{ticks:{font:{size:10},color:'#888'},grid:{color:'rgba(0,0,0,0.04)'}}
+    }
+  }
+});
+
+// Mini USD daily
+new Chart(document.getElementById('usdDailyChart'),{
+  type:'bar',
+  data:{
+    labels:dailyCombined.labels,
+    datasets:[
+      {label:'Leads USD',data:dailyUSD.leads,backgroundColor:'rgba(0,121,107,0.65)',borderRadius:3,yAxisID:'y',order:2},
+      {label:'CPL €',data:dailyCombined.cpl,type:'line',borderColor:'#111111',backgroundColor:'transparent',pointRadius:0,tension:0.5,yAxisID:'yCPL',order:1,borderWidth:2},
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label==='Leads USD'?' '+ctx.parsed.y+' leads':' CPL €'+ctx.parsed.y.toFixed(2)}}},
+    scales:{
+      y:{type:'linear',position:'left',ticks:{font:{size:10},color:'#888',callback:v=>v+' l'},grid:{color:'rgba(0,0,0,0.04)'}},
+      yCPL:{type:'linear',position:'right',display:false},
+      x:{ticks:{font:{size:9},color:'#aaa',maxRotation:45},grid:{display:false}}
+    }
+  }
+});
+
+// Mini EUR daily
+new Chart(document.getElementById('eurDailyChart'),{
+  type:'bar',
+  data:{
+    labels:dailyEUR.labels,
+    datasets:[
+      {label:'Leads EUR',data:dailyEUR.leads,backgroundColor:'rgba(106,27,154,0.65)',borderRadius:3,yAxisID:'yL',order:2},
+      {label:'CPL €',data:dailyEUR.cpl,type:'line',borderColor:'#111',backgroundColor:'transparent',pointRadius:3,tension:0.4,yAxisID:'yCPL',order:1,borderWidth:2},
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label==='Leads EUR'?' '+ctx.parsed.y+' leads':' €'+ctx.parsed.y.toFixed(2)}}},
+    scales:{
+      yL:{type:'linear',position:'left',ticks:{font:{size:10},color:'#888',callback:v=>v+' l'},grid:{color:'rgba(0,0,0,0.04)'}},
+      yCPL:{type:'linear',position:'right',ticks:{font:{size:10},color:'#555',callback:v=>'€'+v},grid:{display:false}},
+      x:{ticks:{font:{size:9},color:'#aaa',maxRotation:45},grid:{display:false}}
+    }
+  }
+});
+
+// Vendas
+new Chart(document.getElementById('vendasChart'),{
+  type:'bar',
+  data:{
+    labels:vendasData.labels,
+    datasets:[
+      {label:'Raízes Caninas',data:vendasData.raizes,backgroundColor:'rgba(230,81,0,.82)',borderRadius:4,stack:'v'},
+      {label:'Taller Paseos',data:vendasData.taller,backgroundColor:'rgba(21,101,192,.82)',stack:'v'},
+      {label:'Cachorros',data:vendasData.cachorros,backgroundColor:'rgba(0,121,107,.82)',stack:'v'},
+      {label:'Primeros Auxilios',data:vendasData.primeiros,backgroundColor:'rgba(106,27,154,.82)',stack:'v'},
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' €'+ctx.parsed.y.toLocaleString('pt-BR')}}},
+    scales:{
+      y:{stacked:true,ticks:{callback:v=>'€'+v.toLocaleString('pt-BR'),font:{size:11},color:'#888'},grid:{color:'rgba(0,0,0,0.05)'}},
+      x:{stacked:true,ticks:{font:{size:11},color:'#888'},grid:{display:false}}
+    }
+  }
+});
+
+// Recorrência
+recChart=new Chart(document.getElementById('recChart'),{
+  type:'bar',
+  data:{
+    labels:['Mês 1','Mês 2','Mês 3','Mês 4','Mês 5','Mês 6'],
+    datasets:[
+      {label:'Mensal',data:[1463,1463,1463,1463,1463,1463],backgroundColor:['#85B7EB','#B5D4F4','#B5D4F4','#B5D4F4','#B5D4F4','#B5D4F4'],borderRadius:4,yAxisID:'y'},
+      {label:'Acumulado',data:[1463,2926,4389,5852,7315,8778],type:'line',borderColor:'#185FA5',backgroundColor:'transparent',pointBackgroundColor:'#185FA5',pointRadius:4,tension:0.3,yAxisID:'y'}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'€'+ctx.parsed.y.toLocaleString('pt-BR')}}},
+    scales:{y:{ticks:{callback:v=>'€'+v.toLocaleString('pt-BR'),font:{size:11},color:'#888'},grid:{color:'rgba(0,0,0,0.05)'}},x:{ticks:{font:{size:11},color:'#888'},grid:{display:false}}}
+  }
+});
+
+// Pie
+pieChart=new Chart(document.getElementById('pieChart'),{
+  type:'doughnut',
+  data:{
+    labels:['Raízes Caninas (preço cheio)','Raízes Caninas (parcelado)','Outros produtos'],
+    datasets:[{data:[7740,8778,1335],backgroundColor:['#E65100','#1976D2','#64748B'],borderWidth:2,borderColor:'#fff'}]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'bottom',labels:{font:{size:12},padding:16,boxWidth:14}},
+      tooltip:{callbacks:{label:ctx=>{const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);return' €'+ctx.parsed.toLocaleString('pt-BR')+' ('+((ctx.parsed/tot)*100).toFixed(1)+'%)';}}}
+    }
+  }
+});
+
+// ========== AUDIENCE TABLES ==========
+function audRow(a,i){
+  const rks=['rn1','rn2','rn3'];
+  return`<tr>
+    <td><span class="rank-num ${i<3?rks[i]:'rnn'}">${i+1}</span></td>
+    <td style="font-weight:600;color:var(--navy);">${a.name}</td>
+    <td class="num">${a.leads.toLocaleString('pt-BR')}</td>
+    <td class="num ${i<2?'best':''}">€${a.cpl.toFixed(2)}</td>
+    <td class="num">${a.ctr.toFixed(2)}%</td>
+    <td class="num">€${a.cpm.toFixed(2)}</td>
+    <td class="num">€${a.spend.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+  </tr>`;
+}
+document.getElementById('audienceEspTbody').innerHTML=audESP.map(audRow).join('');
+document.getElementById('audienceLatamTbody').innerHTML=audLATAM.map(audRow).join('');
+
+// ========== CREATIVE CARDS ==========
+function badge(i){
+  if(i===0)return'<span class="rank-badge gold">🥇 #1</span>';
+  if(i===1)return'<span class="rank-badge silver">🥈 #2</span>';
+  if(i===2)return'<span class="rank-badge bronze">🥉 #3</span>';
+  return`<span class="rank-badge blue">#${i+1}</span>`;
+}
+function rowCls(i){return i===0?'gold-row':i===1?'silver-row':i===2?'bronze-row':'';}
+function crCard(c,i){
+  return(i===0?`<thead><tr>
+    <th>#</th><th>Criativo</th>
+    <th style="text-align:right">Leads</th>
+    <th style="text-align:right">CPL €</th>
+    <th style="text-align:right">CTR</th>
+    <th style="text-align:right">CPM €</th>
+  </tr></thead><tbody>`:'')
+  +`<tr class="${rowCls(i)}">
+    <td>${badge(i)}</td>
+    <td style="font-weight:700;color:var(--navy);">${c.name}</td>
+    <td class="num">${c.leads.toLocaleString('pt-BR')}</td>
+    <td class="cpl-val">€${c.cpl.toFixed(2)}</td>
+    <td class="num">${c.ctr.toFixed(2)}%</td>
+    <td class="num">€${c.cpm.toFixed(2)}</td>
+  </tr>`;
+}
+function renderTable(arr, elId){
+  const rows = arr.map(crCard).join('');
+  document.getElementById(elId).innerHTML = rows + '</tbody>';
+}
+renderTable(crESP, 'creativeEspGrid');
+renderTable(crLATAM, 'creativeLatamGrid');
+
+// Canal origin chart
+new Chart(document.getElementById('canalChart'),{
+  type:'bar',
+  data:{
+    labels:['Meta Ads','Direto / Sem UTM','WhatsApp','Email / Newsletter','Instagram / Manychat','Outro','Social Orgânico'],
+    datasets:[{
+      label:'€ Total 6m',
+      data:[5777,4846,1914,1765,1311,908,830],
+      backgroundColor:['#1976D2','#64748B','#00796B','#E65100','#558B2F','#6A1B9A','#90A4AE'],
+      borderRadius:6,
+    }]
+  },
+  options:{
+    indexAxis:'y',
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' €'+ctx.parsed.x.toLocaleString('pt-BR')}}},
+    scales:{
+      x:{ticks:{callback:v=>'€'+v.toLocaleString('pt-BR'),font:{size:11},color:'#888'},grid:{color:'rgba(0,0,0,0.05)'}},
+      y:{ticks:{font:{size:12},color:'#334155'},grid:{display:false}}
+    }
+  }
+});
+</script>
+</body>
+</html>
